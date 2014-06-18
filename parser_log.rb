@@ -1,3 +1,5 @@
+require 'json'
+
 class ParserLog
 
   def initialize
@@ -12,6 +14,7 @@ class ParserLog
       self.new_player((line.to_s.split(' ')[2]).to_i) if line.to_s.split(' ')[1] == 'ClientConnect:'
       self.edit_player( (line.to_s.split(' ')[2]).to_i, (line.to_s.split(' ')[3]) ) if line.to_s.split(' ')[1] == 'ClientUserinfoChanged:'
       self.new_kill(line.to_s.split(' ')[2].to_i, line.to_s.split(' ')[3].to_i, @game_id) if line.to_s.split(' ')[1] == 'Kill:'
+      self.end_game if line.to_s.split(' ')[1] == 'ShutdownGame:'
     end
   end
 
@@ -44,6 +47,16 @@ class ParserLog
         player["kills"] += 1 if player["id"] == killer_id
       end
     end
+  end
+
+  def end_game
+    @game["game_#{@game_id}"]["players"] = @players.collect{|i| i["name"] }
+    @hash_kills = {}
+    for player in @players
+      @hash_kills[player["name"]] = player["kills"]
+    end
+    @game["game_#{@game_id}"]["kills"] = @hash_kills
+    puts @game.to_json
   end
 
 end
