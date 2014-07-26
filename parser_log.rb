@@ -10,12 +10,13 @@ class ParserLog
 
   def analyze
     @log.each_line do |line|
+      self.end_game if line.to_s.split(' ')[1] == 'InitGame:' && @game != nil
       self.start_game(@game_id) if line.to_s.split(' ')[1] == 'InitGame:'
       self.new_player((line.to_s.split(' ')[2]).to_i) if line.to_s.split(' ')[1] == 'ClientConnect:'
       self.edit_player( (line.to_s.split(' ')[2]).to_i, (line.to_s.split(' ')[3]) ) if line.to_s.split(' ')[1] == 'ClientUserinfoChanged:'
       self.new_kill(line.to_s.split(' ')[2].to_i, line.to_s.split(' ')[3].to_i, @game_id) if line.to_s.split(' ')[1] == 'Kill:'
-      self.end_game if line.to_s.split(' ')[1] == 'ShutdownGame:'
     end
+    self.end_game
   end
 
   def start_game(game_id)
